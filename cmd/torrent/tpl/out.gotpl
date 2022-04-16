@@ -1,0 +1,39 @@
+{{/* gotype: main.TorrentMetaInfo */}}
+{{- define "TorrentMetaInfoSummary" -}}
+Summary:
+    Count: {{.Items | len}}
+    Size: {{.Length | ibytes}}
+    Files: {{.CountFiles }}
+{{end}}
+
+{{- define "TorrentMetaInfo" -}}
+{{- $info:= .Info -}}
+Name: {{$info.Name}}
+Size: {{$info.Length | ibytes}}
+PieceSize: {{$info.PieceLength}} {{$info.PieceLength | ibytes}} log2^{{$info.PieceLength | float64 | log2}}
+Pieces: {{$info.Pieces | len}}
+Manget: magnet:?xt=urn:btih:{{.InfoHash}}
+InfoHash: {{.InfoHash}}
+CreatedBy: {{.CreatedBy}}
+{{- if not .CreationDate.IsZero}}
+CreationDate: {{.CreationDate}}
+{{- end}}
+Comment: {{.Comment}}
+Announce: {{.Announce}}
+{{- with .AnnounceList}}
+AnnounceList: ({{len .}})
+    {{- range $k,$v := .}}
+    {{$v}}
+    {{- end}}
+{{- end}}
+{{- with .URLList}}
+URLs: ({{len .}})
+    {{- range $k,$v := .}}
+        {{$v}}
+    {{- end}}
+{{- end}}
+Files: ({{len $info.Files}})
+{{- range $k,$v := $info.Files}}
+    {{$v.Path}}: {{$v.Length | ibytes}} {{with $v.FirstPiece $info}}{{.Index}}+{{.Offset}}{{if eq .Offset 0}} {{.Hash | hex}}{{end}}{{end}}
+{{- end}}
+{{end}}
